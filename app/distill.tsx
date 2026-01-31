@@ -1,12 +1,11 @@
 import { ThemedText } from "@/components/themed-text";
+import useCards from "@/hooks/use-cards";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { View } from "react-native";
 import { WebView } from "react-native-webview";
 
-type ContentItem =
-  | { type: "text"; content: string }
-  | { type: "image"; src: string };
+import type { ContentItem } from "@/types/content";
 
 const usePageContent = () => {
   const [pageContent, setPageContent] = useState<ContentItem[]>([]);
@@ -19,11 +18,17 @@ const DistillProcessPage = () => {
   const { url } = useLocalSearchParams<{ url: string }>();
   const webViewRef = useRef<WebView>(null);
   const { pageContent, setPageContent } = usePageContent();
+  const { cards, sortInfo, possibleMetrics } = useCards(pageContent);
 
   useEffect(() => {
     // This will run whenever pageContent changes
     console.log("Page content changed");
-  }, [pageContent]);
+    console.log(sortInfo);
+    console.log(possibleMetrics);
+    cards.map((i) => {
+      console.log(i.name);
+    });
+  }, [cards]);
 
   const extractContent = () => {
     if (webViewRef.current) {
