@@ -1,4 +1,5 @@
 import { ShareGuideGlyph } from "@/assets/images/svg/share-guide-glyph";
+import { ActivityLoader } from "@/components/activity-loader";
 import { ThemedText } from "@/components/themed-text";
 import { useRouter } from "expo-router";
 import { useShareIntentContext } from "expo-share-intent";
@@ -37,6 +38,8 @@ const ShareCheckerPage = () => {
           }}
         >
           <ShareGuideGlyph />
+
+          <ActivityLoader />
           <ThemedText style={{ textAlign: "center" }}>
             Tap Share and select Distill to begin distilling sites and text.
           </ThemedText>
