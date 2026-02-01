@@ -5,6 +5,7 @@ import {
   BORDER_RADIUS,
   COLORS,
   SPACING,
+  getIconEmoji,
   getTrendColor,
   getTrendIcon,
   sharedStyles,
@@ -29,7 +30,9 @@ export function StatsRenderer({ data }: StatsRendererProps) {
         {data.stats.map((stat, index) => (
           <View key={`stat-${index}`} style={styles.statCard}>
             {/* Icon */}
-            {stat.icon && <Text style={styles.statIcon}>{stat.icon}</Text>}
+            {stat.icon && (
+              <Text style={styles.statIcon}>{getIconEmoji(stat.icon)}</Text>
+            )}
 
             {/* Value with trend */}
             <View style={styles.valueRow}>

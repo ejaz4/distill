@@ -149,3 +149,145 @@ export function getTrendColor(
       return COLORS.textSecondary;
   }
 }
+
+// Icon name to emoji mapping
+const ICON_MAP: Record<string, string> = {
+  // Common stats/metrics
+  chart: "📊",
+  graph: "📈",
+  trending: "📈",
+  analytics: "📊",
+  stats: "📊",
+  growth: "📈",
+  decline: "📉",
+
+  // People/Users
+  user: "👤",
+  users: "👥",
+  people: "👥",
+  team: "👥",
+  person: "👤",
+  profile: "👤",
+
+  // Money/Finance
+  money: "💰",
+  dollar: "💵",
+  currency: "💰",
+  price: "💲",
+  revenue: "💰",
+  profit: "💵",
+  cost: "💸",
+  budget: "💰",
+
+  // Time
+  time: "⏱️",
+  clock: "🕐",
+  calendar: "📅",
+  date: "📅",
+  schedule: "📆",
+  duration: "⏱️",
+
+  // Technology
+  code: "💻",
+  computer: "💻",
+  laptop: "💻",
+  phone: "📱",
+  mobile: "📱",
+  server: "🖥️",
+  database: "🗄️",
+  cloud: "☁️",
+
+  // Communication
+  email: "📧",
+  message: "💬",
+  chat: "💬",
+  notification: "🔔",
+  bell: "🔔",
+
+  // Status
+  check: "✅",
+  success: "✅",
+  error: "❌",
+  warning: "⚠️",
+  info: "ℹ️",
+  question: "❓",
+
+  // Objects
+  star: "⭐",
+  heart: "❤️",
+  like: "👍",
+  fire: "🔥",
+  lightning: "⚡",
+  target: "🎯",
+  flag: "🚩",
+  bookmark: "🔖",
+  pin: "📌",
+
+  // Navigation/Actions
+  home: "🏠",
+  settings: "⚙️",
+  search: "🔍",
+  filter: "🔍",
+  edit: "✏️",
+  delete: "🗑️",
+  add: "➕",
+  remove: "➖",
+  link: "🔗",
+  share: "📤",
+  download: "📥",
+  upload: "📤",
+
+  // Documents
+  file: "📄",
+  document: "📄",
+  folder: "📁",
+  image: "🖼️",
+  photo: "📷",
+  video: "🎬",
+  music: "🎵",
+
+  // Business
+  business: "💼",
+  briefcase: "💼",
+  company: "🏢",
+  building: "🏢",
+  shop: "🏪",
+  store: "🛒",
+  cart: "🛒",
+
+  // Location
+  location: "📍",
+  map: "🗺️",
+  globe: "🌍",
+  world: "🌍",
+
+  // Misc
+  gift: "🎁",
+  rocket: "🚀",
+  trophy: "🏆",
+  medal: "🏅",
+  crown: "👑",
+  gem: "💎",
+  lock: "🔒",
+  unlock: "🔓",
+  key: "🔑",
+  tool: "🔧",
+  wrench: "🔧",
+  hammer: "🔨",
+  light: "💡",
+  idea: "💡",
+  bulb: "💡",
+};
+
+// Get emoji from icon name (case insensitive, with fallback)
+export function getIconEmoji(iconName?: string): string {
+  if (!iconName) return "";
+
+  // If it's already an emoji (starts with a unicode emoji char), return as is
+  const emojiRegex =
+    /^[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+  if (emojiRegex.test(iconName)) return iconName;
+
+  const normalized = iconName.toLowerCase().trim();
+  return ICON_MAP[normalized] || "📌"; // Default fallback
+}

@@ -31,7 +31,9 @@ export interface SpecItem {
 export interface CardData {
   title: string;
   subtitle?: string;
-  image?: string;
+  image?: string; // Full card image (shows as large background)
+  banner?: string; // Small banner image at top of card
+  icon?: string; // Icon name for icon-style cards
   rating?: number;
   price?: string;
   pros?: string[];

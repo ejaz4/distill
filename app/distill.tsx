@@ -1,3 +1,4 @@
+import { ActivityLoader } from "@/components/activity-loader";
 import { DistilledContentRenderer } from "@/components/distilled";
 import { ThemedText } from "@/components/themed-text";
 import { useDistillation, type ContentItem } from "@/hooks/use-distillation";
@@ -138,8 +139,12 @@ const DistillPage = () => {
         {/* Loading State */}
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ThemedText style={styles.loadingText}>
+            <ActivityLoader />
+            <ThemedText style={styles.loadingTitle}>
               Distilling content…
+            </ThemedText>
+            <ThemedText style={styles.loadingText}>
+              Extracting and transforming into a beautiful summary
             </ThemedText>
             <ThemedText style={styles.loadingUrl} numberOfLines={1}>
               {url}
@@ -221,19 +226,29 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
   },
   loadingContainer: {
-    padding: 24,
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    paddingVertical: 120,
+    gap: 16,
   },
-  loadingText: {
-    fontSize: 18,
+  loadingTitle: {
+    fontSize: 20,
     fontWeight: "600",
     color: "rgba(255,255,255,0.9)",
+    marginTop: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    textAlign: "center",
+    maxWidth: "80%",
   },
   loadingUrl: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.4)",
     maxWidth: "80%",
+    marginTop: 8,
   },
   errorContainer: {
     backgroundColor: "rgba(255,69,58,0.1)",
