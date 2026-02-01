@@ -1,16 +1,9 @@
+import { DistilledContentRenderer } from "@/components/distilled";
 import { ThemedText } from "@/components/themed-text";
-import { useCards } from "@/hooks/use-cards";
-import type { ContentItem } from "@/types/content";
+import { useDistillation, type ContentItem } from "@/hooks/use-distillation";
 import { useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import {
-  ImageBackground,
-  Linking,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useRef, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { WebView } from "react-native-webview";
 
 const useExtractedContent = () => {
@@ -22,15 +15,11 @@ const DistillPage = () => {
   const { url } = useLocalSearchParams<{ url: string }>();
   const webViewRef = useRef<WebView>(null);
   const { content, setContent } = useExtractedContent();
-  const { cards, isLoading, error, resultsDescription } = useCards({
+  const { distilledContent, isLoading, error } = useDistillation({
     content,
     endpoint: process.env.EXPO_PUBLIC_CARDS_ENDPOINT ?? "",
     contentKey: url,
   });
-
-  useEffect(() => {
-    console.log(resultsDescription);
-  }, [resultsDescription]);
 
   const extractionScript = `
     (function() {
@@ -142,97 +131,58 @@ const DistillPage = () => {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.cardsContainer}>
-        {isLoading && <ThemedText>Generating cards…</ThemedText>}
-        {!!error && <ThemedText>Failed: {error}</ThemedText>}
-        {!isLoading && !error && cards.length === 0 && (
-          <ThemedText>No cards yet.</ThemedText>
-        )}
-        {!!resultsDescription && (
-          <ThemedText style={styles.resultsDescription}>
-            {resultsDescription}
-          </ThemedText>
-        )}
-        <ThemedText>Distilling: {url}</ThemedText>
-        {cards.map((card, index) => (
-          <View key={`${card.name}-${index}`} style={styles.card}>
-            {card.image ? (
-              <ImageBackground
-                source={{ uri: card.image }}
-                style={styles.cardImage}
-                imageStyle={styles.cardImageInner}
-              >
-                <View style={styles.imageOverlay}>
-                  <ThemedText style={styles.cardTitle}>{card.name}</ThemedText>
-                  {!!card.shortDescription && (
-                    <ThemedText style={styles.cardDescription}>
-                      {card.shortDescription}
-                    </ThemedText>
-                  )}
-                  {!!card.fields?.length && (
-                    <View style={styles.chipsContainer}>
-                      {card.fields.map((field, fieldIndex) => (
-                        <View
-                          key={`${field.label}-${fieldIndex}`}
-                          style={styles.chip}
-                        >
-                          <ThemedText style={styles.chipLabel}>
-                            {field.value}
-                          </ThemedText>
-                        </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              </ImageBackground>
-            ) : (
-              <View style={[styles.cardImage, styles.cardImageFallback]}>
-                <ThemedText style={styles.cardTitle}>{card.name}</ThemedText>
-                {!!card.shortDescription && (
-                  <ThemedText style={styles.cardDescription}>
-                    {card.shortDescription}
-                  </ThemedText>
-                )}
-                {!!card.fields?.length && (
-                  <View style={styles.chipsContainer}>
-                    {card.fields.map((field, fieldIndex) => (
-                      <View
-                        key={`${field.label}-${fieldIndex}`}
-                        style={styles.chip}
-                      >
-                        <ThemedText style={styles.chipLabel}>
-                          {field.value}
-                        </ThemedText>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-            )}
-
-            {!!card.buttons?.length && (
-              <View style={styles.buttonsContainer}>
-                {card.buttons.map((button, buttonIndex) => (
-                  <Pressable
-                    key={`${button.label}-${buttonIndex}`}
-                    style={styles.button}
-                    onPress={() => {
-                      Linking.openURL(button.url).catch((err) =>
-                        console.error("Failed to open url", err),
-                      );
-                    }}
-                  >
-                    <ThemedText style={styles.buttonLabel}>
-                      {button.label}
-                    </ThemedText>
-                  </Pressable>
-                ))}
-              </View>
-            )}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ThemedText style={styles.loadingText}>
+              Distilling content…
+            </ThemedText>
+            <ThemedText style={styles.loadingUrl} numberOfLines={1}>
+              {url}
+            </ThemedText>
           </View>
-        ))}
+        )}
+
+        {/* Error State */}
+        {!!error && (
+          <View style={styles.errorContainer}>
+            <ThemedText style={styles.errorTitle}>
+              Distillation Failed
+            </ThemedText>
+            <ThemedText style={styles.errorText}>{error}</ThemedText>
+          </View>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && !distilledContent && (
+          <View style={styles.emptyContainer}>
+            <ThemedText style={styles.emptyText}>
+              Preparing to distill…
+            </ThemedText>
+          </View>
+        )}
+
+        {/* Distilled Content */}
+        {distilledContent && distilledContent.components.length > 0 && (
+          <DistilledContentRenderer data={distilledContent} />
+        )}
+
+        {/* Source indicator */}
+        {distilledContent && (
+          <View style={styles.sourceContainer}>
+            <ThemedText style={styles.sourceLabel}>Distilled from</ThemedText>
+            <ThemedText style={styles.sourceUrl} numberOfLines={1}>
+              {url}
+            </ThemedText>
+          </View>
+        )}
       </ScrollView>
 
+      {/* Hidden WebView for content extraction */}
       {url && (
         <WebView
           ref={webViewRef}
@@ -246,8 +196,8 @@ const DistillPage = () => {
             try {
               const extractedContent = JSON.parse(event.nativeEvent.data);
               setContent(extractedContent);
-            } catch (error) {
-              console.error("Error parsing extracted content:", error);
+            } catch (parseError) {
+              console.error("Error parsing extracted content:", parseError);
             }
           }}
           onError={(syntheticEvent) => {
@@ -264,83 +214,70 @@ const DistillPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: 16,
   },
-  cardsContainer: {
-    paddingVertical: 12,
-    gap: 12,
+  scrollContent: {
+    paddingVertical: 16,
+    // paddingHorizontal: 16,
+    paddingBottom: 48,
   },
-  resultsDescription: {
-    fontSize: 16,
-    lineHeight: 24,
-    opacity: 0.9,
-    paddingHorizontal: 16,
-    marginBottom: 8,
+  loadingContainer: {
+    padding: 24,
+    alignItems: "center",
+    gap: 8,
   },
-  card: {
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.04)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    overflow: "hidden",
-  },
-  cardImage: {
-    width: "100%",
-    minHeight: 200,
-    justifyContent: "flex-end",
-  },
-  cardImageInner: {
-    borderRadius: 16,
-  },
-  cardImageFallback: {
-    padding: 16,
-  },
-  imageOverlay: {
-    padding: 16,
-    backgroundColor: "rgba(0,0,0,0.35)",
-  },
-  cardTitle: {
+  loadingText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: "rgba(255,255,255,0.9)",
   },
-  cardDescription: {
-    opacity: 0.9,
-    color: "#fff",
+  loadingUrl: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    maxWidth: "80%",
   },
-  chipsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginTop: 8,
-  },
-  chip: {
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 9999,
-    backgroundColor: "rgba(0,0,0,0.5)",
+  errorContainer: {
+    backgroundColor: "rgba(255,69,58,0.1)",
+    borderRadius: 12,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
+    borderColor: "rgba(255,69,58,0.3)",
   },
-  chipLabel: {
-    fontSize: 12,
-    color: "#fff",
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FF453A",
+    marginBottom: 4,
   },
-  buttonsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    padding: 12,
-    paddingTop: 10,
-  },
-  button: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  buttonLabel: {
+  errorText: {
     fontSize: 14,
+    color: "rgba(255,255,255,0.7)",
+  },
+  emptyContainer: {
+    padding: 24,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.5)",
+  },
+  sourceContainer: {
+    marginTop: 32,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    gap: 4,
+  },
+  sourceLabel: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  sourceUrl: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.6)",
+    maxWidth: "90%",
   },
   hiddenWebView: {
     opacity: 0,
