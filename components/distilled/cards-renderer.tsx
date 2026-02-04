@@ -1,11 +1,10 @@
 import type { CardsComponent } from "@/types/distilled-content";
 import React from "react";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, StyleSheet, Text, View } from "react-native";
 import {
   BORDER_RADIUS,
   COLORS,
   SPACING,
-  getIconEmoji,
   renderRatingStars,
   sharedStyles,
 } from "./shared-styles";
@@ -25,152 +24,104 @@ export function CardsRenderer({ data }: CardsRendererProps) {
       )}
 
       <View style={styles.cardsContainer}>
-        {data.cards.map((card, index) => {
-          const hasFullImage = !!card.image;
-          const hasBanner = !!card.banner;
-          const hasIcon = !!card.icon;
-
-          return (
-            <View key={`card-${index}`} style={styles.card}>
-              {/* Variant 1: Full image background */}
-              {hasFullImage && (
-                <ImageBackground
-                  source={{ uri: card.image }}
-                  style={styles.cardImage}
-                  imageStyle={styles.cardImageInner}
-                >
-                  <View style={styles.imageOverlay}>
-                    <Text style={styles.cardTitleLight}>{card.title}</Text>
-                    {card.subtitle && (
-                      <Text style={styles.cardSubtitleLight}>
-                        {card.subtitle}
-                      </Text>
-                    )}
-                  </View>
-                </ImageBackground>
-              )}
-
-              {/* Variant 2: Small banner image at top */}
-              {!hasFullImage && hasBanner && (
-                <>
-                  <Image
-                    source={{ uri: card.banner }}
-                    style={styles.cardBanner}
-                    resizeMode="cover"
-                  />
-                  <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>{card.title}</Text>
-                    {card.subtitle && (
-                      <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
-                    )}
-                  </View>
-                </>
-              )}
-
-              {/* Variant 3: Icon style card */}
-              {!hasFullImage && !hasBanner && hasIcon && (
-                <View style={styles.cardHeaderWithIcon}>
-                  <View style={styles.cardIconPlaceholder}>
-                    <Text style={styles.cardIconEmoji}>
-                      {getIconEmoji(card.icon)}
-                    </Text>
-                  </View>
-                  <View style={styles.cardHeaderText}>
-                    <Text style={styles.cardTitle}>{card.title}</Text>
-                    {card.subtitle && (
-                      <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
-                    )}
-                  </View>
-                </View>
-              )}
-
-              {/* Variant 4: Plain card (no image, no banner, no icon) */}
-              {!hasFullImage && !hasBanner && !hasIcon && (
-                <View style={styles.cardHeaderPlain}>
+        {data.cards.map((card, index) => (
+          <View key={`card-${index}`} style={styles.card}>
+            {card.image ? (
+              <ImageBackground
+                source={{ uri: card.image }}
+                style={styles.cardImage}
+                imageStyle={styles.cardImageInner}
+              >
+                <View style={styles.imageOverlay}>
                   <Text style={styles.cardTitle}>{card.title}</Text>
                   {card.subtitle && (
                     <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
                   )}
                 </View>
-              )}
-
-              <View style={styles.cardContent}>
-                {/* Rating & Price Row */}
-                {(card.rating !== undefined || card.price) && (
-                  <View style={styles.metaRow}>
-                    {card.rating !== undefined && (
-                      <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingStars}>
-                          {renderRatingStars(card.rating)}
-                        </Text>
-                        <Text style={styles.ratingValue}>
-                          {card.rating.toFixed(1)}
-                        </Text>
-                      </View>
-                    )}
-                    {card.price && (
-                      <Text style={styles.price}>{card.price}</Text>
-                    )}
-                  </View>
-                )}
-
-                {/* Summary */}
-                {card.summary && (
-                  <Text style={styles.summary}>{card.summary}</Text>
-                )}
-
-                {/* Pros */}
-                {card.pros && card.pros.length > 0 && (
-                  <View style={styles.prosConsContainer}>
-                    <Text style={styles.prosTitle}>Pros</Text>
-                    {card.pros.map((pro, i) => (
-                      <View key={`pro-${i}`} style={styles.prosConsItem}>
-                        <Text style={styles.prosIcon}>✓</Text>
-                        <Text style={styles.prosConsText}>{pro}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Cons */}
-                {card.cons && card.cons.length > 0 && (
-                  <View style={styles.prosConsContainer}>
-                    <Text style={styles.consTitle}>Cons</Text>
-                    {card.cons.map((con, i) => (
-                      <View key={`con-${i}`} style={styles.prosConsItem}>
-                        <Text style={styles.consIcon}>✗</Text>
-                        <Text style={styles.prosConsText}>{con}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Specs */}
-                {card.specs && card.specs.length > 0 && (
-                  <View style={styles.specsContainer}>
-                    {card.specs.map((spec, i) => (
-                      <View key={`spec-${i}`} style={styles.specItem}>
-                        <Text style={styles.specLabel}>{spec.key}</Text>
-                        <Text style={styles.specValue}>{spec.value}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Tags */}
-                {card.tags && card.tags.length > 0 && (
-                  <View style={styles.tagsContainer}>
-                    {card.tags.map((tag, i) => (
-                      <View key={`tag-${i}`} style={sharedStyles.chip}>
-                        <Text style={sharedStyles.chipText}>{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
+              </ImageBackground>
+            ) : (
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>{card.title}</Text>
+                {card.subtitle && (
+                  <Text style={styles.cardSubtitle}>{card.subtitle}</Text>
                 )}
               </View>
+            )}
+
+            <View style={styles.cardContent}>
+              {/* Rating & Price Row */}
+              {(card.rating !== undefined || card.price) && (
+                <View style={styles.metaRow}>
+                  {card.rating !== undefined && (
+                    <View style={styles.ratingContainer}>
+                      <Text style={styles.ratingStars}>
+                        {renderRatingStars(card.rating)}
+                      </Text>
+                      <Text style={styles.ratingValue}>
+                        {card.rating.toFixed(1)}
+                      </Text>
+                    </View>
+                  )}
+                  {card.price && <Text style={styles.price}>{card.price}</Text>}
+                </View>
+              )}
+
+              {/* Summary */}
+              {card.summary && (
+                <Text style={styles.summary}>{card.summary}</Text>
+              )}
+
+              {/* Pros */}
+              {card.pros && card.pros.length > 0 && (
+                <View style={styles.prosConsContainer}>
+                  <Text style={styles.prosTitle}>Pros</Text>
+                  {card.pros.map((pro, i) => (
+                    <View key={`pro-${i}`} style={styles.prosConsItem}>
+                      <Text style={styles.prosIcon}>✓</Text>
+                      <Text style={styles.prosConsText}>{pro}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Cons */}
+              {card.cons && card.cons.length > 0 && (
+                <View style={styles.prosConsContainer}>
+                  <Text style={styles.consTitle}>Cons</Text>
+                  {card.cons.map((con, i) => (
+                    <View key={`con-${i}`} style={styles.prosConsItem}>
+                      <Text style={styles.consIcon}>✗</Text>
+                      <Text style={styles.prosConsText}>{con}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Specs */}
+              {card.specs && Object.keys(card.specs).length > 0 && (
+                <View style={styles.specsContainer}>
+                  {Object.entries(card.specs).map(([key, value], i) => (
+                    <View key={`spec-${i}`} style={styles.specItem}>
+                      <Text style={styles.specLabel}>{key}</Text>
+                      <Text style={styles.specValue}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Tags */}
+              {card.tags && card.tags.length > 0 && (
+                <View style={styles.tagsContainer}>
+                  {card.tags.map((tag, i) => (
+                    <View key={`tag-${i}`} style={sharedStyles.chip}>
+                      <Text style={sharedStyles.chipText}>{tag}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
-          );
-        })}
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -187,7 +138,6 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     overflow: "hidden",
   },
-  // Full image style
   cardImage: {
     width: "100%",
     height: 180,
@@ -201,65 +151,19 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     backgroundColor: COLORS.overlayLight,
   },
-  // Banner style
-  cardBanner: {
-    width: "100%",
-    height: 80,
-    borderTopLeftRadius: BORDER_RADIUS.lg,
-    borderTopRightRadius: BORDER_RADIUS.lg,
-  },
   cardHeader: {
     padding: SPACING.lg,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
-  // Icon style
-  cardHeaderWithIcon: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: SPACING.lg,
-    gap: SPACING.md,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  cardIconPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: COLORS.accentSoft,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cardIconEmoji: {
-    fontSize: 24,
-  },
-  cardHeaderText: {
-    flex: 1,
-  },
-  // Plain style (no image, no banner, no icon)
-  cardHeaderPlain: {
-    padding: SPACING.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.textPrimary,
-  },
-  cardTitleLight: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: COLORS.textPrimary,
   },
   cardSubtitle: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    marginTop: SPACING.xs,
-  },
-  cardSubtitleLight: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
     marginTop: SPACING.xs,
   },
   cardContent: {
